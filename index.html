@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto TinkerCAD - Sistema de Monitoreo Industrial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151932;
+            --accent-green: #00ff88;
+            --accent-cyan: #00d9ff;
+            --accent-red: #ff3864;
+            --accent-yellow: #ffd93d;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 30%, rgba(0, 255, 136, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(0, 217, 255, 0.15) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundPulse 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+            width: 0%;
+            z-index: 1000;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 20px var(--accent-green);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+            position: relative;
+            margin-bottom: 60px;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 56, 100, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: heroGlow 8s ease-in-out infinite;
+        }
+
+        @keyframes heroGlow {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .project-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-yellow));
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(255, 56, 100, 0.4);
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .tinkercad-link {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            color: var(--bg-primary);
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
+            margin-top: 20px;
+        }
+
+        .tinkercad-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 217, 255, 0.5);
+        }
+
+        /* Section */
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--accent-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Components Grid */
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .component-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .component-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.2);
+        }
+
+        .component-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .component-icon {
+            font-size: 2rem;
+        }
+
+        .component-name {
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+        }
+
+        .component-qty {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .component-function {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Code Block */
+        .code-container {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px 24px;
+            border-radius: 12px 12px 0 0;
+            border: 1px solid var(--glass-border);
+            border-bottom: none;
+        }
+
+        .code-lang {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-red);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-btn {
+            padding: 8px 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 600;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            border-color: var(--accent-green);
+            transform: scale(1.05);
+        }
+
+        .copy-btn.copied {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            border-color: var(--accent-green);
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 0 0 12px 12px;
+            padding: 30px;
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .code-block::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .code-block::-webkit-scrollbar-thumb {
+            background: var(--accent-green);
+            border-radius: 10px;
+        }
+
+        .code-block::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .code-block pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #ff79c6; font-weight: 600; }
+        .string { color: #50fa7b; }
+        .comment { color: #6272a4; font-style: italic; }
+        .number { color: #bd93f9; }
+        .function { color: #8be9fd; }
+        .type { color: #ffb86c; }
+
+        /* Table */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .info-table th {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            color: var(--bg-primary);
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .info-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-primary);
+        }
+
+        .info-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .info-table tr:hover {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        /* Challenge Box */
+        .challenge-box {
+            background: linear-gradient(135deg, rgba(255, 56, 100, 0.1), rgba(255, 217, 61, 0.1));
+            border: 2px solid var(--accent-red);
+            border-radius: 16px;
+            padding: 28px;
+            margin: 30px 0;
+        }
+
+        .challenge-title {
+            color: var(--accent-red);
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .challenge-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .challenge-list li {
+            padding: 12px 0 12px 50px;
+            position: relative;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .challenge-list li:last-child {
+            border-bottom: none;
+        }
+
+        .challenge-list li::before {
+            content: attr(data-level);
+            position: absolute;
+            left: 0;
+            top: 8px;
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-yellow));
+            color: var(--bg-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(255, 56, 100, 0.3);
+        }
+
+        /* Tips Box */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .tip-card {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(185, 103, 255, 0.1));
+            border: 1px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .tip-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .tip-title {
+            color: var(--accent-cyan);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        /* Evaluation Grid */
+        .eval-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .eval-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .eval-item:hover {
+            border-color: var(--accent-green);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .eval-points {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .eval-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Connection Diagram */
+        .connection-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 30px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 2;
+        }
+
+        .connection-section {
+            margin-bottom: 20px;
+        }
+
+        .connection-title {
+            color: var(--accent-cyan);
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .connection-line {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        .connection-line::before {
+            content: '→';
+            color: var(--accent-green);
+            margin-right: 8px;
+            font-weight: 700;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding: 40px 20px;
+            border-top: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+        }
+
+        .footer-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        /* Scroll to Top */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-yellow));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(255, 56, 100, 0.4);
+            z-index: 100;
+            font-size: 1.5rem;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(255, 56, 100, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 40px 20px 30px;
+            }
+
+            .section {
+                padding: 25px;
+            }
+
+            .components-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .code-block {
+                padding: 20px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* List Styles */
+        ul, ol {
+            margin-left: 20px;
+            margin-top: 10px;
+            line-height: 2;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        strong {
+            color: var(--accent-green);
+        }
+
+        code {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent-green);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="project-badge">PROYECTO TINKERCAD</div>
+        <h1 class="hero-title">SISTEMA DE MONITOREO Y ALARMA INDUSTRIAL</h1>
+        <p class="hero-subtitle">Taller de Programación 3ro 1° · 2026</p>
+        <a href="https://www.tinkercad.com/" target="_blank" class="tinkercad-link">
+            Abrir TinkerCAD →
+        </a>
+    </div>
+
+    <div class="container">
+        <!-- Contexto -->
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">🎯</div>
+                <span>Contexto de la Misión</span>
+            </h2>
+            <p style="font-size: 1.1rem; line-height: 1.8;">
+                Sos el técnico a cargo de monitorear una sala de control industrial. Necesitás implementar un sistema que supervise <strong>temperatura y luminosidad</strong> constantemente, y active alertas visuales y sonoras cuando los valores estén fuera de rango.
+            </p>
+        </div>
+
+        <!-- Componentes -->
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">🔧</div>
+                <span>Componentes Necesarios</span>
+            </h2>
+            
+            <div class="components-grid">
+                <div class="component-card">
+                    <div class="component-header">
+                        <div class="component-icon">🔲</div>
+                        <div style="flex: 1;">
+                            <div class="component-name">Arduino Uno</div>
+                            <div class="component-qty">x1</div>
+                        </div>
+                    </div>
+                    <div class="component-function">Cerebro del sistema</div>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-header">
+                        <div class="component-icon">🌡</div>
+                        <div style="flex: 1;">
+                            <div class="component-name">TMP36</div>
+                            <div class="component-qty">x1</div>
+                        </div>
+                    </div>
+                    <div class="component-function">Sensor de temperatura</div>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-header">
+                        <div class="component-icon">💡</div>
+                        <div style="flex: 1;">
+                            <div class="component-name">Fotoresistor LDR</div>
+                            <div class="component-qty">x1</div>
+                        </div>
+                    </div>
+                    <div class="component-function">Sensor de luminosidad</div>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-header">
+                        <div class="component-icon">🟢</div>
+                        <div style="flex: 1;">
+                            <div class="component-name">LED Verde</div>
+                            <div class="component-qty">x1</div>
+                        </div>
+                    </div>
+                    <div class="component-function">Estado NORMAL</div>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-header">
+                        <div class="component-icon">🟡</div>
+                        <div style="flex: 1;">
+                            <div class="component-name">LED Amarillo</div>
+                            <div class="component-qty">x1</div>
+                        </div>
+                    </div>
+                    <div class="component-function">Estado PRECAUCIÓN</div>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-header">
+                        <div class="component-icon">🔴</div>
+                        <div style="flex: 1;">
+                            <div class="component-name">LED Rojo</div>
+                            <div class="component-qty">x1</div>
+                        </div>
+                    </div>
+                    <div class="component-function">Estado CRÍTICO</div>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-header">
+                        <div class="component-icon">🔊</div>
+                        <div style="flex: 1;">
+                            <div class="component-name">Buzzer</div>
+                            <div class="component-qty">x1</div>
+                        </div>
+                    </div>
+                    <div class="component-function">Alarma sonora</div>
+                </div>
+
+                <div class="component-card">
+                    <div class="component-header">
+                        <div class="component-icon">⚡</div>
+                        <div style="flex: 1;">
+                            <div class="component-name">Resistencias</div>
+                            <div class="component-qty">x4</div>
+                        </div>
+                    </div>
+                    <div class="component-function">3x 220Ω (LEDs) + 1x 10kΩ (LDR)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conexiones -->
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">🔌</div>
+                <span>Conexiones del Circuito</span>
+            </h2>
+
+            <div class="connection-box">
+                <div class="connection-section">
+                    <div class="connection-title">Sensor TMP36</div>
+                    <div class="connection-line">Pin Vout → Arduino A0</div>
+                    <div class="connection-line">Pin +Vs → 5V</div>
+                    <div class="connection-line">Pin GND → GND</div>
+                </div>
+
+                <div class="connection-section">
+                    <div class="connection-title">Fotoresistor (LDR)</div>
+                    <div class="connection-line">Un extremo → 5V</div>
+                    <div class="connection-line">Otro extremo → A1 (y resistencia 10kΩ a GND)</div>
+                </div>
+
+                <div class="connection-section">
+                    <div class="connection-title">LEDs</div>
+                    <div class="connection-line">LED Verde → Pin 8 (con resistencia 220Ω)</div>
+                    <div class="connection-line">LED Amarillo → Pin 9 (con resistencia 220Ω)</div>
+                    <div class="connection-line">LED Rojo → Pin 10 (con resistencia 220Ω)</div>
+                </div>
+
+                <div class="connection-section">
+                    <div class="connection-title">Buzzer</div>
+                    <div class="connection-line">Pin positivo → Pin 11</div>
+                    <div class="connection-line">Pin negativo → GND</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lógica del Sistema -->
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">⚙</div>
+                <span>Lógica del Sistema</span>
+            </h2>
+
+            <h3 style="color: var(--accent-cyan); margin: 20px 0 10px; font-size: 1.2rem;">TEMPERATURA</h3>
+            <ul>
+                <li><strong>Normal (18-25°C):</strong> LED verde encendido</li>
+                <li><strong>Precaución (26-30°C):</strong> LED amarillo encendido</li>
+                <li><strong>Crítico (>30°C):</strong> LED rojo + buzzer intermitente</li>
+            </ul>
+
+            <h3 style="color: var(--accent-cyan); margin: 30px 0 10px; font-size: 1.2rem;">LUMINOSIDAD</h3>
+            <ul>
+                <li>Si la luz es demasiado baja (<200), activar LED amarillo adicional</li>
+            </ul>
+
+            <h3 style="color: var(--accent-cyan); margin: 30px 0 10px; font-size: 1.2rem;">ALMACENAMIENTO</h3>
+            <ul>
+                <li>Guardar las últimas 5 lecturas de temperatura en un array</li>
+                <li>Cada 10 lecturas, calcular y mostrar el promedio en el Monitor Serie</li>
+            </ul>
+        </div>
+
+        <!-- Código -->
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">💻</div>
+                <span>Código Base</span>
+            </h2>
+
+            <div class="code-container">
+                <div class="code-header">
+                    <span class="code-lang">
+                        <span style="color: var(--accent-red);">●</span>
+                        Arduino C++
+                    </span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar Código</button>
+                </div>
+                <div class="code-block">
+<pre><span class="comment">// Pines de sensores</span>
+<span class="keyword">const int</span> PIN_TEMP = A0;
+<span class="keyword">const int</span> PIN_LUZ = A1;
+
+<span class="comment">// Pines de LEDs</span>
+<span class="keyword">const int</span> LED_VERDE = <span class="number">8</span>;
+<span class="keyword">const int</span> LED_AMARILLO = <span class="number">9</span>;
+<span class="keyword">const int</span> LED_ROJO = <span class="number">10</span>;
+
+<span class="comment">// Pin de buzzer</span>
+<span class="keyword">const int</span> BUZZER = <span class="number">11</span>;
+
+<span class="comment">// Umbrales de temperatura</span>
+<span class="keyword">const float</span> TEMP_NORMAL = <span class="number">25.0</span>;
+<span class="keyword">const float</span> TEMP_PRECAUCION = <span class="number">30.0</span>;
+
+<span class="comment">// Umbral de luminosidad</span>
+<span class="keyword">const int</span> LUZ_BAJA = <span class="number">200</span>;
+
+<span class="comment">// Array para almacenar últimas 5 temperaturas</span>
+<span class="keyword">float</span> ultimas_temps[<span class="number">5</span>];
+<span class="keyword">int</span> indice_temp = <span class="number">0</span>;
+
+<span class="keyword">void</span> <span class="function">setup</span>() {
+  Serial.begin(<span class="number">9600</span>);
+  
+  <span class="comment">// Configurar pines de salida</span>
+  pinMode(LED_VERDE, OUTPUT);
+  pinMode(LED_AMARILLO, OUTPUT);
+  pinMode(LED_ROJO, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
+  
+  Serial.println(<span class="string">"Sistema de Monitoreo Iniciado"</span>);
+  Serial.println(<span class="string">"------------------------------"</span>);
+}
+
+<span class="keyword">void</span> <span class="function">loop</span>() {
+  <span class="comment">// TU CÓDIGO AQUÍ:</span>
+  
+  <span class="comment">// 1. LEER SENSOR DE TEMPERATURA</span>
+  <span class="keyword">int</span> lectura_temp = analogRead(PIN_TEMP);
+  <span class="keyword">float</span> voltaje = lectura_temp * (<span class="number">5.0</span> / <span class="number">1023.0</span>);
+  <span class="keyword">float</span> temperatura = (voltaje - <span class="number">0.5</span>) * <span class="number">100.0</span>;  <span class="comment">// TMP36 formula</span>
+  
+  <span class="comment">// 2. LEER SENSOR DE LUZ</span>
+  <span class="keyword">int</span> luz = analogRead(PIN_LUZ);
+  
+  <span class="comment">// 3. GUARDAR TEMPERATURA EN ARRAY</span>
+  <span class="comment">// (implementar rotación del array)</span>
+  
+  <span class="comment">// 4. EVALUAR TEMPERATURA Y ACTIVAR LEDs</span>
+  <span class="comment">// (implementar con if/else)</span>
+  
+  <span class="comment">// 5. EVALUAR LUMINOSIDAD</span>
+  <span class="comment">// (implementar alerta de luz baja)</span>
+  
+  <span class="comment">// 6. MOSTRAR DATOS EN SERIAL</span>
+  Serial.print(<span class="string">"Temp: "</span>);
+  Serial.print(temperatura);
+  Serial.print(<span class="string">"°C | Luz: "</span>);
+  Serial.println(luz);
+  
+  delay(<span class="number">1000</span>);  <span class="comment">// Esperar 1 segundo</span>
+}
+
+<span class="comment">// FUNCIONES AUXILIARES QUE DEBERÍAS CREAR:</span>
+
+<span class="comment">// Función para calcular promedio del array</span>
+<span class="keyword">float</span> <span class="function">calcularPromedio</span>() {
+  <span class="comment">// TU CÓDIGO AQUÍ</span>
+}
+
+<span class="comment">// Función para activar alarma (buzzer intermitente)</span>
+<span class="keyword">void</span> <span class="function">activarAlarma</span>() {
+  <span class="comment">// TU CÓDIGO AQUÍ</span>
+}
+
+<span class="comment">// Función para apagar todos los LEDs</span>
+<span class="keyword">void</span> <span class="function">apagarLEDs</span>() {
+  <span class="comment">// TU CÓDIGO AQUÍ</span>
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requisitos -->
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">✅</div>
+                <span>Requisitos Mínimos</span>
+            </h2>
+            <ul style="font-size: 1.05rem;">
+                <li>El sistema lee ambos sensores correctamente</li>
+                <li>Los LEDs se encienden según el rango de temperatura</li>
+                <li>El buzzer suena cuando la temperatura es crítica</li>
+                <li>Se muestran los valores en el Monitor Serie cada segundo</li>
+            </ul>
+        </div>
+
+        <!-- Desafíos Extra -->
+        <div class="challenge-box">
+            <h2 class="challenge-title">🔥 Desafíos Extra</h2>
+            <ul class="challenge-list">
+                <li data-level="N1"><strong>Nivel 1:</strong> Implementar el array circular de 5 temperaturas y mostrar el promedio cada 10 lecturas</li>
+                <li data-level="N2"><strong>Nivel 2:</strong> Hacer que el buzzer suene con un patrón diferente según si la alerta es por temperatura O por luz baja</li>
+                <li data-level="N3"><strong>Nivel 3:</strong> Agregar un LED RGB que cambie de color suavemente según la temperatura (fade entre verde → amarillo → rojo)</li>
+                <li data-level="N4"><strong>Nivel 4:</strong> Implementar un "modo silencio" que se active/desactive presionando un botón (el buzzer no suena, pero los LEDs sí)</li>
+            </ul>
+        </div>
+
+        <!-- Tips -->
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">💡</div>
+                <span>Tips para Resolver</span>
+            </h2>
+
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-icon">🔄</div>
+                    <div class="tip-title">Array Circular</div>
+                    <div>Cuando <code>indice_temp</code> llegue a 5, volvelo a 0 usando el operador módulo <code>%</code></div>
+                </div>
+
+                <div class="tip-card">
+                    <div class="tip-icon">🔊</div>
+                    <div class="tip-title">Buzzer Intermitente</div>
+                    <div>Usá <code>tone()</code> y <code>noTone()</code> alternando con delays cortos</div>
+                </div>
+
+                <div class="tip-card">
+                    <div class="tip-icon">📊</div>
+                    <div class="tip-title">Promedios</div>
+                    <div>Recorré el array con un <code>for</code> sumando todos los valores, después dividí por 5</div>
+                </div>
+
+                <div class="tip-card">
+                    <div class="tip-icon">🐛</div>
+                    <div class="tip-title">Debugging</div>
+                    <div>Usá <code>Serial.print()</code> para ver qué valores te llegan de los sensores</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluación -->
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">📋</div>
+                <span>Criterios de Evaluación</span>
+            </h2>
+
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>Aspecto</th>
+                        <th style="text-align: center;">Puntos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Circuito armado correctamente</td>
+                        <td style="text-align: center; font-weight: 700; color: var(--accent-green);">2 pts</td>
+                    </tr>
+                    <tr>
+                        <td>Lectura de sensores funciona</td>
+                        <td style="text-align: center; font-weight: 700; color: var(--accent-green);">2 pts</td>
+                    </tr>
+                    <tr>
+                        <td>Lógica de LEDs correcta</td>
+                        <td style="text-align: center; font-weight: 700; color: var(--accent-green);">2 pts</td>
+                    </tr>
+                    <tr>
+                        <td>Buzzer activado en momento correcto</td>
+                        <td style="text-align: center; font-weight: 700; color: var(--accent-green);">1 pt</td>
+                    </tr>
+                    <tr>
+                        <td>Código ordenado y comentado</td>
+                        <td style="text-align: center; font-weight: 700; color: var(--accent-green);">1 pt</td>
+                    </tr>
+                    <tr>
+                        <td>Array de temperaturas implementado</td>
+                        <td style="text-align: center; font-weight: 700; color: var(--accent-green);">1 pt</td>
+                    </tr>
+                    <tr>
+                        <td>Función de promedio funciona</td>
+                        <td style="text-align: center; font-weight: 700; color: var(--accent-green);">1 pt</td>
+                    </tr>
+                    <tr style="background: rgba(0, 255, 136, 0.1);">
+                        <td><strong>TOTAL</strong></td>
+                        <td style="text-align: center; font-weight: 900; color: var(--accent-green); font-size: 1.2rem;">10 pts</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Entregables -->
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">📤</div>
+                <span>Entregables</span>
+            </h2>
+            <ol style="font-size: 1.05rem; line-height: 2;">
+                <li><strong>Link a tu proyecto TinkerCAD</strong> (público o compartido con el profe)</li>
+                <li><strong>Código completo</strong> comentado</li>
+                <li><strong>Video o screenshots</strong> mostrando el sistema funcionando en diferentes estados (normal, precaución, crítico)</li>
+                <li><strong>Breve explicación</strong> (3-4 líneas) de cómo funciona tu sistema</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="container">
+        <div class="footer">
+            <div class="footer-logo">ACPI · TALLER</div>
+            <p style="color: var(--text-secondary); margin: 10px 0;">Taller de Programación 3ro 1° · 2026</p>
+            <p style="color: var(--text-secondary);">Prof. Pablo Limardo · Jefatura ACPI</p>
+            <p style="color: var(--text-secondary);">Escuela Industrial N°9 "15 de Noviembre"</p>
+            <p style="margin-top: 20px; color: var(--accent-green); font-weight: 600;">Proyecto TinkerCAD - Sistema de Monitoreo Industrial</p>
+        </div>
+    </div>
+
+    <!-- Scroll to Top -->
+    <div class="scroll-top" id="scrollTop" onclick="scrollToTop()">↑</div>
+
+    <script>
+        // Progress Bar
+        function updateProgressBar() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        window.addEventListener('scroll', updateProgressBar);
+
+        // Scroll to Top Button
+        const scrollTopButton = document.getElementById('scrollTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollTopButton.classList.add('visible');
+            } else {
+                scrollTopButton.classList.remove('visible');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Copy Code Functionality
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-container').querySelector('.code-block pre');
+            const code = codeBlock.textContent;
+
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✓ Código Copiado';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+            });
+        }
+
+        // Log
+        console.log('🎯 Proyecto TinkerCAD - Sistema de Monitoreo Industrial');
+        console.log('📊 Taller de Programación 3ro 1°');
+        console.log('⚡ Página lista para GitHub Pages');
+    </script>
+</body>
+</html>
